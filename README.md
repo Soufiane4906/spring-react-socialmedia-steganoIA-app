@@ -46,9 +46,5 @@ After running the Web API, you can make HTTP requests like:
    ```
 
 
-### Share Post
-
-![App Screenshot](/readme-img/sharepost.png)
-
 
 
