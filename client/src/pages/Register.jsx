@@ -14,7 +14,7 @@ function Register() {
 
   const formik = useFormik({
     initialValues: {
-      firstName: "",
+      name: "",
       lastName: "",
       email: "",
       password: ""
@@ -82,8 +82,8 @@ function Register() {
               <Input
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                value={formik.values.firstName}
-                name='firstName'
+                value={formik.values.name}
+                name='name'
                 type='text'
               />
 

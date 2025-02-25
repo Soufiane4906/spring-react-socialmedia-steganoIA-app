@@ -19,13 +19,14 @@ function Profile() {
     const [following, setFollowing] = useState([])
     const [isOwner,setIsOwner] = useState(false)
     const [isFollowing, setIsFollowing] = useState(false)
-    
-   
+
+
     const getData = useCallback(async() => {
         const postService = new PostService()
         try {
             const result = await postService.getAllByUserId(userId, localStorage.getItem("token"))
             setPosts(result.data)
+            console.log('data' , result.data)
         } catch (error) {
             console.log(error.message)
         }
