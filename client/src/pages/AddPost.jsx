@@ -24,7 +24,8 @@ import { useNavigate } from 'react-router-dom'
 function AddPost() {
 
     const { user } = useContext(AuthContext)
-    const [file, setFile] = useState(null)
+console.log("user:", user)
+   const [file, setFile] = useState(null)
     const { isOpen, onOpen, onClose } = useDisclosure()
     const toast = useToast()
     const token = localStorage.getItem("token")

@@ -4,7 +4,8 @@ import PostCard from './PostCard'
 
 function Posts({posts}) {
 
-    const imageUrl = process.env.REACT_APP_API + "postimages/download/" 
+    const imageUrl = process.env.REACT_APP_API + "postimages/download/"
+    console.log("image url",imageUrl)
 
     return (
         <>

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/server/socialMediaApp.iml" filepath="$PROJECT_DIR$/server/socialMediaApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/spring-react-socialmedia-app.iml" filepath="$PROJECT_DIR$/.idea/spring-react-socialmedia-app.iml" />
     </modules>
   </component>

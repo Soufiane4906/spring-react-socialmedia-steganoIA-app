@@ -45,9 +45,8 @@ public class PostsController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<String> delete(@RequestParam int id){
-        postService.delete(id);
-        return new ResponseEntity<>("Deleted",HttpStatus.OK);
+    public ResponseEntity<String> delete(@RequestParam int postId) {
+        postService.delete(postId);
+        return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
-
 }

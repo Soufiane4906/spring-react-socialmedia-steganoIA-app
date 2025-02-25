@@ -32,4 +32,17 @@ export default class PostService{
             }
         })
     }
+
+    delete(postId, token) {
+        console.log("Token utilisé :", token); // 🔍 Vérifie ici
+        return axios.delete(`${process.env.REACT_APP_API}posts/delete`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            params: { postId }
+        });
+    }
+
+
+
 }
