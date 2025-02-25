@@ -16,7 +16,7 @@ function Home() {
         try {
             if (user.id !== undefined) {
                 const result = await postService.getAllByUserFollowing(user.id, localStorage.getItem("token"))
-rmdir /S /Q .git
+
                 setPosts(result.data)
             }
 
