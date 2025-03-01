@@ -109,7 +109,7 @@ public class SteganographyUtil {
                     String email = parts[0];
                     long timestamp = Long.parseLong(parts[1]);
                     // Basic validation for email and timestamp
-                    if (email.contains("@") && timestamp > 0) {
+                    if (email.contains("@") && timestamp > 0) {  //data :  aaaaaaa \\ donnnes dimages
                         return true;
                     }
                 }

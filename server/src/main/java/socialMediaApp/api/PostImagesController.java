@@ -9,6 +9,7 @@ import socialMediaApp.responses.postImage.PostImageResponse;
 import socialMediaApp.services.PostImageService;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/postimages")
@@ -21,10 +22,17 @@ public class PostImagesController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<PostImageResponse> upload(@RequestParam("image") MultipartFile file,@RequestParam int postId) throws IOException {
-           PostImageResponse postImageResponse = postImageService.upload(file,postId);
-            return new ResponseEntity<>(postImageResponse, HttpStatus.OK);
+    public ResponseEntity<?> upload(@RequestParam("image") MultipartFile file, @RequestParam int postId) {
+        try {
+            PostImageResponse response = postImageService.upload(file, postId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "File processing error."));
+        }
     }
+
 
     @GetMapping("/download/{postId}")
     public ResponseEntity<?> download(@PathVariable int postId){
