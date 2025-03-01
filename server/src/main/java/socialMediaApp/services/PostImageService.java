@@ -12,7 +12,9 @@ import socialMediaApp.models.PostImage;
 import socialMediaApp.repositories.PostImageRepository;
 import socialMediaApp.responses.postImage.PostImageResponse;
 import socialMediaApp.utils.ImageUtil;
+
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,7 +26,8 @@ public class PostImageService {
     private final PostImageMapper postImageMapper;
     private final RestTemplate restTemplate;
 
-    private static final String FLASK_API_URL = "http://localhost:5000/upload"; // Adjust Flask API URL
+    private static final String FLASK_API_URL = "http://localhost:5000/upload"; // Flask detection API
+    private static final String FLASK_STEGANO_URL = "http://localhost:5000/add_steganography"; // Flask stegano API
 
     public PostImageService(PostImageRepository postImageRepository, PostService postService,
                             PostImageMapper postImageMapper, RestTemplate restTemplate) {
@@ -35,18 +38,25 @@ public class PostImageService {
     }
 
     public PostImageResponse upload(MultipartFile file, int postId) throws IOException {
-        // 🔹 Call Flask API for image validation
+        // 🔹 Step 1: Validate image with Flask
         Map<String, Object> validationResponse = validateImageWithFlask(file);
 
         if (validationResponse.containsKey("error")) {
             throw new IllegalArgumentException(validationResponse.get("error").toString());
         }
 
-        // ✅ If valid, proceed with saving the image
+        // 🔹 Step 2: If clean, add steganography (hidden timestamp)
+        byte[] finalImageData = file.getBytes();
+        if (validationResponse.containsKey("valid") && (boolean) validationResponse.get("valid")) {
+            String timestampSignature = Instant.now().toString();
+            finalImageData = addSteganography(file, timestampSignature);
+        }
+
+        // 🔹 Step 3: Save the image in the database
         PostImage postImage = new PostImage();
         postImage.setName(file.getOriginalFilename());
         postImage.setType(file.getContentType());
-        postImage.setData(ImageUtil.compressImage(file.getBytes()));
+        postImage.setData(ImageUtil.compressImage(finalImageData));
         postImage.setPost(postService.getById(postId));
         postImageRepository.save(postImage);
 
@@ -55,13 +65,11 @@ public class PostImageService {
 
     /**
      * Calls the Flask API to check for steganography & AI-generated detection.
-     * Returns a structured response.
      */
     private Map<String, Object> validateImageWithFlask(MultipartFile file) throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        // Convert MultipartFile to HTTP request
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", new ByteArrayResource(file.getBytes()) {
             @Override
@@ -71,11 +79,8 @@ public class PostImageService {
         });
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        // 🔹 Call Flask API
         ResponseEntity<Map> response = restTemplate.exchange(FLASK_API_URL, HttpMethod.POST, requestEntity, Map.class);
 
-        // 🔹 Extract response
         if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
             return Map.of("error", "Flask API error: No response received.");
         }
@@ -90,7 +95,6 @@ public class PostImageService {
         boolean isAIGenerated = aiDetection != null && aiDetection.containsKey("is_ai_generated")
                 && Boolean.TRUE.equals(aiDetection.get("is_ai_generated"));
 
-        // ❌ If AI or steganography detected, return error message
         if (containsSteganography) {
             return Map.of("error", "Image contains hidden steganography data.");
         }
@@ -99,9 +103,54 @@ public class PostImageService {
             return Map.of("error", "AI-generated images are not allowed.");
         }
 
-        // ✅ If image passes validation
         return Map.of("valid", true);
     }
+
+    /**
+     * Calls the Flask API to add a steganography signature.
+     */
+    private byte[] addSteganography(MultipartFile file, String signature) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", new ByteArrayResource(file.getBytes()) {
+            @Override
+            public String getFilename() {
+                return file.getOriginalFilename();
+            }
+        });
+        body.add("signature", signature);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        ResponseEntity<Map> response = restTemplate.exchange(FLASK_STEGANO_URL, HttpMethod.POST, requestEntity, Map.class);
+
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            Object imageUrlObj = response.getBody().get("image_url");
+            if (imageUrlObj instanceof String) {
+                return downloadImageFromFlask((String) imageUrlObj);
+            }
+        }
+
+        throw new IOException("Flask Steganography API failed to return a valid image URL.");
+    }
+
+    /**
+     * Downloads the processed image from Flask after steganography.
+     */
+    private byte[] downloadImageFromFlask(String imageUrl) throws IOException {
+        try {
+            ResponseEntity<byte[]> response = restTemplate.getForEntity(imageUrl, byte[].class);
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                return response.getBody();
+            } else {
+                throw new IOException("Failed to download image from Flask. Status: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new IOException("Error fetching image from Flask: " + e.getMessage(), e);
+        }
+    }
+
 
     public byte[] download(int id) {
         Optional<PostImage> postImage = postImageRepository.findPostImageByPost_Id(id);
