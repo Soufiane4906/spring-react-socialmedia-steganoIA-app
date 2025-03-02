@@ -45,29 +45,6 @@ After running the Web API, you can make HTTP requests like:
    https://localhost:8080/api/auth/register
    ```
 ## Screenshots
-### Register Page
-
-![App Screenshot](/readme-img/register.png)
-
-### Home
-
-![App Screenshot](/readme-img/home.png)
-
-### Profile
-
-![App Screenshot](/readme-img/profile.png)
-
-### User Profile
-
-![App Screenshot](/readme-img/userProfile.png)
-
-### Comments
-
-![App Screenshot](/readme-img/comments.png)
-
-### Share Post
-
-![App Screenshot](/readme-img/sharepost.png)
 
 
 
