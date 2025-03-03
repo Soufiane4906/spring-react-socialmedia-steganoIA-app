@@ -1,0 +1,55 @@
+---
+title: SteganographIA - Cas d'Utilisation
+---
+flowchart TB
+    %% Acteurs
+    User([Utilisateur])
+    Admin([Administrateur])
+    FlaskAPI([API Flask])
+    
+    %% Cas d'utilisation - Utilisateur
+    UC1[Télécharger une image]
+    UC2[Gérer les commentaires]
+    UC3[Suivre/Ne plus suivre]
+    UC4[Aimer/Ne plus aimer]
+    UC5[Consulter les images]
+    
+    %% Cas d'utilisation - Administrateur
+    UC6[Analyser les métadonnées]
+    UC7[Vérifier les signatures]
+    UC8[Gérer les utilisateurs]
+    
+    %% Cas d'utilisation - API Flask
+    UC9[Valider les images]
+    UC10[Ajouter stéganographie]
+    UC11[Détecter images IA]
+    
+    %% Relations - Utilisateur
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    User --> UC4
+    User --> UC5
+    
+    %% Relations - Administrateur
+    Admin --> UC6
+    Admin --> UC7
+    Admin --> UC8
+    Admin --> UC1
+    
+    %% Relations - API Flask
+    FlaskAPI --> UC9
+    FlaskAPI --> UC10
+    FlaskAPI --> UC11
+    
+    %% Inclusions et extensions
+    UC1 -.-> UC9
+    UC9 -.-> UC11
+    UC1 -.-> UC10
+    
+    %% Styles
+    classDef actor fill:#f9f,stroke:#333,stroke-width:2px
+    classDef usecase fill:#ccf,stroke:#33c,stroke-width:1px
+    
+    class User,Admin,FlaskAPI actor
+    class UC1,UC2,UC3,UC4,UC5,UC6,UC7,UC8,UC9,UC10,UC11 usecase

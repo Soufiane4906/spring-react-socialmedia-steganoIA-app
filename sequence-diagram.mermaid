@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant Client
+    participant PostImageService
+    participant Flask as API Flask
+    participant ImageUtil
+    participant PostImageRepo as PostImageRepository
+    
+    Client->>+PostImageService: upload(file, postId)
+    
+    PostImageService->>+Flask: validateImageWithFlask(file)
+    Note over Flask: Analyse stéganographie<br/>Détection image IA
+    Flask-->>-PostImageService: résultat validation
+    
+    alt Image Invalide
+        PostImageService-->>Client: Erreur: Image non valide (AI ou stéganographie)
+    else Image Valide
+        PostImageService->>+Flask: addSteganography(file, signature)
+        Note over Flask: Ajoute timestamp<br/>dans l'image
+        Flask-->>-PostImageService: URL de l'image modifiée
+        
+        PostImageService->>+Flask: downloadImageFromFlask(URL)
+        Flask-->>-PostImageService: image avec signature
+        
+        PostImageService->>ImageUtil: compressImage(imageData)
+        ImageUtil-->>PostImageService: données compressées
+        
+        PostImageService->>PostImageRepo: save(postImage)
+        PostImageRepo-->>PostImageService: postImage sauvegardé
+        
+        PostImageService-->>-Client: PostImageResponse
+    end

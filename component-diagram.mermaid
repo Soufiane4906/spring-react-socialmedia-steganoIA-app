@@ -1,0 +1,103 @@
+flowchart TB
+    subgraph Spring["Application Spring Boot"]
+        direction TB
+        subgraph Services["Services"]
+            PostImageService
+            UserService
+            CommentService
+            LikeService
+            FollowService
+            PostService
+            UserImageService
+        end
+        
+        subgraph Repositories["Repositories"]
+            PostImageRepo["PostImageRepository"]
+            UserRepo["UserRepository"]
+            CommentRepo["CommentRepository"]
+            LikeRepo["LikeRepository"]
+            FollowRepo["FollowRepository"]
+            PostRepo["PostRepository"]
+            UserImageRepo["UserImageRepository"]
+        end
+        
+        subgraph Mappers["Mappers"]
+            PostImageMapper
+            UserMapper
+            CommentMapper
+            LikeMapper
+            FollowMapper
+            PostMapper
+        end
+        
+        subgraph Utils["Utilities"]
+            ImageUtil
+        end
+        
+        subgraph RestClient["REST Client"]
+            RestTemplate
+        end
+    end
+    
+    subgraph Flask["API Flask (Python)"]
+        direction TB
+        ImageValidator["Image Validator"]
+        AIDetector["AI Image Detector"]
+        SteganoModule["Steganography Module"]
+        MetadataExtractor["Metadata Extractor"]
+        TensorflowModel["TensorFlow Model"]
+    end
+    
+    subgraph DB["Database"]
+        PostgreSQL[(PostgreSQL DB)]
+    end
+    
+    %% Internal connections
+    PostImageService --> PostImageRepo
+    PostImageService --> PostService
+    PostImageService --> PostImageMapper
+    PostImageService --> ImageUtil
+    PostImageService --> RestTemplate
+    
+    UserService --> UserRepo
+    UserService --> FollowRepo
+    UserService --> UserMapper
+    
+    CommentService --> CommentRepo
+    CommentService --> CommentMapper
+    
+    LikeService --> LikeRepo
+    LikeService --> LikeMapper
+    
+    FollowService --> FollowRepo
+    FollowService --> FollowMapper
+    FollowService --> UserService
+    
+    PostService --> PostRepo
+    PostService --> PostMapper
+    PostService --> UserService
+    
+    UserImageService --> UserImageRepo
+    UserImageService --> UserService
+    UserImageService --> UserMapper
+    UserImageService --> ImageUtil
+    
+    %% Database connections
+    Repositories <--> PostgreSQL
+    
+    %% Flask API connections
+    RestTemplate <--> ImageValidator
+    RestTemplate <--> SteganoModule
+    
+    ImageValidator --> AIDetector
+    ImageValidator --> MetadataExtractor
+    AIDetector --> TensorflowModel
+    
+    %% Legend/Description
+    classDef springComponent fill:#a1c9a1,stroke:#489148,stroke-width:2px
+    classDef flaskComponent fill:#a7c4e5,stroke:#4885e5,stroke-width:2px
+    classDef database fill:#e5a7a7,stroke:#e54848,stroke-width:2px
+    
+    class Services,Repositories,Mappers,Utils,RestClient springComponent
+    class ImageValidator,AIDetector,SteganoModule,MetadataExtractor,TensorflowModel flaskComponent
+    class PostgreSQL database

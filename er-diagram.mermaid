@@ -1,0 +1,62 @@
+erDiagram
+    USER {
+        int id PK
+        string username
+        string email
+        string password
+    }
+    
+    POST {
+        int id PK
+        string description
+        date createdDate
+        int user_id FK
+    }
+    
+    POST_IMAGE {
+        int id PK
+        string name
+        string type
+        byte[] data
+        int post_id FK
+    }
+    
+    COMMENT {
+        int id PK
+        string description
+        date createdDate
+        int user_id FK
+        int post_id FK
+    }
+    
+    LIKE {
+        int id PK
+        int user_id FK
+        int post_id FK
+    }
+    
+    FOLLOW {
+        int id PK
+        int user_id FK "follower"
+        int following_id FK "followed user"
+    }
+    
+    USER_IMAGE {
+        int id PK
+        string name
+        string type
+        byte[] data
+        int user_id FK
+    }
+    
+    USER ||--o{ USER_IMAGE : "profile"
+    USER ||--o{ POST : "creates"
+    USER ||--o{ COMMENT : "writes"
+    USER ||--o{ LIKE : "gives"
+    USER ||--o{ FOLLOW : "follows"
+    
+    POST ||--o{ POST_IMAGE : "contains"
+    POST ||--o{ COMMENT : "has"
+    POST ||--o{ LIKE : "receives"
+    
+    FOLLOW ||--|| USER : "following"

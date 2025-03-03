@@ -1,0 +1,36 @@
+classDiagram
+    class Flask {
+        +UPLOAD_FOLDER: String
+        +MODEL_PATH: String
+        +model: TensorFlow Model
+        +upload_image() Response
+        +add_steganography() Response
+        +get_uploaded_file() File
+    }
+    
+    class SteganographyAnalyzer {
+        +analyze_steganography(image_path) Dict
+        +embed_steganography(image_path, signature) String
+    }
+    
+    class AIDetector {
+        +detect_ai_image(image_path) Dict
+    }
+    
+    class MetadataExtractor {
+        +get_image_metadata(image_path) Dict
+    }
+    
+    class ImageProcessor {
+        +resize(img, width, height) Image
+        +normalize(img_array) Array
+    }
+    
+    Flask --> SteganographyAnalyzer: uses
+    Flask --> AIDetector: uses
+    Flask --> MetadataExtractor: uses
+    AIDetector --> ImageProcessor: uses
+    
+    note for Flask "API Flask exposant les endpoints\npour la validation et le traitement des images"
+    note for SteganographyAnalyzer "Utilise la bibliothèque 'stegano'\npour la stéganographie LSB"
+    note for AIDetector "Utilise un modèle TensorFlow\npour détecter les images générées par IA"

@@ -1,0 +1,207 @@
+classDiagram
+    %% Services
+    class PostImageService {
+        -PostImageRepository postImageRepository
+        -PostService postService
+        -PostImageMapper postImageMapper
+        -RestTemplate restTemplate
+        +upload(MultipartFile, int) PostImageResponse
+        -validateImageWithFlask(MultipartFile) Map
+        -addSteganography(MultipartFile, String) byte[]
+        -downloadImageFromFlask(String) byte[]
+        +download(int) byte[]
+    }
+    
+    class UserService {
+        -UserMapper userMapper
+        -UserRepository userRepository
+        -FollowRepository followRepository
+        +getAll() List~UserResponse~
+        +getResponseById(int) UserResponse
+        +getByEmail(String) UserResponse
+        +getUserFollowing(int) List~UserFollowingResponse~
+        +isFollowing(int, int) boolean
+        +getById(int) User
+        +add(UserAddRequest) void
+        +delete(int) void
+    }
+    
+    class CommentService {
+        -CommentRepository commentRepository
+        -CommentMapper commentMapper
+        +add(CommentAddRequest) void
+        +getAll() List~CommentGetResponse~
+        +getById(int) CommentGetResponse
+        +getAllByPost(int) List~CommentGetResponse~
+        +getAllByUser(int) List~CommentGetResponse~
+        +update(int, CommentUpdateRequest) void
+        +delete(int) void
+    }
+    
+    class LikeService {
+        -LikeRepository likeRepository
+        -LikeMapper likeMapper
+        +getAllByPost(int) List~LikeResponse~
+        +getAllByUser(int) List~LikeResponse~
+        +isLiked(int, int) boolean
+        +add(LikeRequest) void
+        +delete(LikeRequest) void
+    }
+    
+    class FollowService {
+        -FollowRepository followRepository
+        -FollowMapper followMapper
+        -UserService userService
+        +add(FollowRequest) void
+        +delete(FollowRequest) void
+    }
+    
+    class PostService {
+        -PostRepository postRepository
+        -PostMapper postMapper
+        -UserService userService
+        +getAll() List~PostGetResponse~
+        +getResponseById(int) PostGetResponse
+        +getById(int) Post
+        +getAllByUser(int) List~PostGetResponse~
+        +getByUserFollowing(int) List~PostGetResponse~
+        +add(PostAddRequest) int
+        +delete(int) void
+    }
+    
+    class UserImageService {
+        -UserImageRepository userImageRepository
+        -UserService userService
+        -UserImageMapper userImageMapper
+        +upload(MultipartFile, int) UserImageResponse
+        +download(int) byte[]
+    }
+    
+    %% Repositories
+    class PostImageRepository {
+        +findPostImageByPost_Id(int) Optional~PostImage~
+    }
+    
+    class UserRepository {
+        +findByEmail(String) User
+    }
+    
+    class CommentRepository {
+        +findAllByPost_Id(int) List~Comment~
+        +findAllByUser_Id(int) List~Comment~
+    }
+    
+    class LikeRepository {
+        +findAllByPost_Id(int) List~Like~
+        +findAllByUser_Id(int) List~Like~
+        +findByUser_IdAndPost_Id(int, int) Optional~Like~
+    }
+    
+    class FollowRepository {
+        +findAllByUser_Id(int) List~Follow~
+        +findByUser_IdAndFollowing_Id(int, int) Optional~Follow~
+    }
+    
+    class PostRepository {
+        +findAllByUser_IdOrderByIdDesc(int) List~Post~
+    }
+    
+    class UserImageRepository {
+        +findByUser_Id(int) Optional~UserImage~
+    }
+    
+    %% Models
+    class User {
+        -int id
+        -String username
+        -String email
+        -String password
+    }
+    
+    class Post {
+        -int id
+        -String description
+        -Date createdDate
+        -User user
+    }
+    
+    class PostImage {
+        -int id
+        -String name
+        -String type
+        -byte[] data
+        -Post post
+    }
+    
+    class Comment {
+        -int id
+        -String description
+        -Date createdDate
+        -User user
+        -Post post
+    }
+    
+    class Like {
+        -int id
+        -User user
+        -Post post
+    }
+    
+    class Follow {
+        -int id
+        -User user
+        -User following
+    }
+    
+    class UserImage {
+        -int id
+        -String name
+        -String type
+        -byte[] data
+        -User user
+    }
+    
+    %% External Services
+    class FlaskAPI {
+        +uploadImage(MultipartFile) Map
+        +addSteganography(MultipartFile, String) Map
+    }
+    
+    %% Utilities
+    class ImageUtil {
+        +compressImage(byte[]) byte[]
+        +decompressImage(byte[]) byte[]
+    }
+    
+    %% Relationships
+    PostImageService --> PostImageRepository
+    PostImageService --> PostService
+    PostImageService --> ImageUtil
+    PostImageService ..> FlaskAPI : uses
+    
+    UserService --> UserRepository
+    UserService --> FollowRepository
+    
+    CommentService --> CommentRepository
+    
+    LikeService --> LikeRepository
+    
+    FollowService --> FollowRepository
+    FollowService --> UserService
+    
+    PostService --> PostRepository
+    PostService --> UserService
+    
+    UserImageService --> UserImageRepository
+    UserImageService --> UserService
+    UserImageService --> ImageUtil
+    
+    Post "1" --> "*" PostImage
+    Post "1" --> "*" Comment
+    Post "1" --> "*" Like
+    
+    User "1" --> "*" Post
+    User "1" --> "*" Comment
+    User "1" --> "*" Like
+    User "1" --> "*" Follow
+    User "1" --> "0..1" UserImage

@@ -1,0 +1,32 @@
+stateDiagram-v2
+    [*] --> Réception
+    Réception --> ValidationAPI: Envoie à l'API Flask
+    
+    ValidationAPI --> VérificationStéganographie: Analyse l'image
+    VérificationStéganographie --> DétectionIA: Si pas de stéganographie
+    VérificationStéganographie --> Rejet: Si stéganographie détectée
+    
+    DétectionIA --> AjoutSignature: Si pas d'image IA
+    DétectionIA --> Rejet: Si image générée par IA
+    
+    AjoutSignature --> Compression: Ajoute timestamp
+    Compression --> Sauvegarde: Compresse l'image
+    Sauvegarde --> [*]: Image stockée en DB
+    
+    Rejet --> [*]: Image rejetée
+    
+    note right of ValidationAPI
+        L'API Flask effectue deux contrôles:
+        1. Présence de stéganographie
+        2. Détection d'images générées par IA
+    end note
+    
+    note right of AjoutSignature
+        Ajoute une signature horodatée
+        via stéganographie LSB
+    end note
+    
+    note right of Compression
+        Utilise ImageUtil pour réduire
+        la taille des données avant stockage
+    end note
